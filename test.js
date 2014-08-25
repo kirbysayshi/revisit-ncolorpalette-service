@@ -13,9 +13,8 @@ test('png -> gif', function(t) {
     .send({ content: { data: kirby } })
     .expect(200)
     .expect('Content-Type', /json/)
+    .expect(/\{"data":"data:image\/gif/)
     .end(function(err, res) {
-      t.ok(res.body.content, 'has content');
-      t.ok(/^data:image\/gif/.exec(res.body.content.data), 'is data-uri');
       t.end(err);
     })
 
