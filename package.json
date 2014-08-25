@@ -1,0 +1,33 @@
+{
+  "name": "ncolorpalette-api",
+  "version": "0.0.0",
+  "description": "revisit.link service for ncolorpalette",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "not yet"
+  },
+  "keywords": [
+    "cluster",
+    "revisit.link"
+  ],
+  "author": "Drew Petersen <kirbysayshi@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.6.5",
+    "data-uri-to-buffer": "0.0.3",
+    "express": "^4.8.5",
+    "morgan": "^1.2.3",
+    "ncolorpalette-clusterer": "^1.0.1",
+    "readimage": "^1.0.0",
+    "writegif": "^1.0.4"
+  },
+  "devDependencies": {
+    "supertest": "^0.13.0",
+    "tape": "^2.14.0"
+  }
+}
