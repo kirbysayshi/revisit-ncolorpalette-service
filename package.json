@@ -22,7 +22,7 @@
     "data-uri-to-buffer": "0.0.3",
     "express": "^4.8.5",
     "morgan": "^1.2.3",
-    "ncolorpalette-clusterer": "^1.0.1",
+    "ncolorpalette-clusterer": "^2.0.1",
     "ncolorpalette-palettes": "^1.0.0",
     "readimage": "^1.0.0",
     "writegif": "^1.0.4"

@@ -20,46 +20,103 @@ app.get('/', function(req, res) {
 
 app.post('/gameboy/service', function(req, res) {
   // same as below but doesn't cycle, always outputs gif
+  var buf = dataUriToBuffer(req.body.content.data);
+  readimage(buf, function(err, image) {
+    if (err) {
+      res.status(500).json(err);
+      return;
+    }
+
+    var solved = [];
+    var solvedCount = 0;
+    image.frames.forEach(function(frame, i) {
+      var c = new NCP(frame.data);
+      c.solve(function(){}, onSolve.bind(null, i))
+    })
+
+    function onSolve(frameIdx, clusterer) {
+      solved[frameIdx] = clusterer;
+      solvedCount += 1;
+      if (solvedCount !== image.frames.length) return;
+
+      var palette = palettes.gameboy.pixels.slice(0);
+      image.frames.forEach(function(frame, i) {
+        var clusterer = solved[i];
+        clusterer.applyPalette(palette, frame.data);
+      })
+      writegif(image, finish)
+    }
+
+    function finish(err, buf) {
+      if (err) {
+        return res.status(500).json(err);
+      }
+      res.json({
+        content: {
+          data: 'data:image/gif;base64,'
+          + buf.toString('base64')
+        }
+      })
+    }
+  })
 })
 
 app.post('/cycled-gameboy/service', function(req, res) {
   var buf = dataUriToBuffer(req.body.content.data);
   readimage(buf, function(err, image) {
     if (err) {
-      res.json(err);
+      res.status(500).json(err);
       return;
     }
 
-    // TODO: instead compute Cluster for each frame...
-    var input = image.frames[0].data;
-
-    var c = new NCP(input);
-    c.solve(function(){}, function(count) {
-
-      applyCyclePalette(c, image, palettes.gameboy.pixels);
-
-      writegif(image, function(err, output) {
-        res.json({
-          content: {
-            data: 'data:image/gif;base64,'
-            + output.toString('base64')
-          }
-        })
-      })
+    var solved = [];
+    var solvedCount = 0;
+    image.frames.forEach(function(frame, i) {
+      var c = new NCP(frame.data);
+      c.solve(function(){}, onSolve.bind(null, i))
     })
+
+    function onSolve(frameIdx, clusterer) {
+      solved[frameIdx] = clusterer;
+      solvedCount += 1;
+      if (solvedCount !== image.frames.length) return;
+
+      var palette = palettes.gameboy.pixels.slice(0);
+      applyCyclePalette(solved, image, palette);
+      writegif(image, finish)
+    }
+
+    function finish(err, buf) {
+      if (err) {
+        return res.status(500).json(err);
+      }
+      res.json({
+        content: {
+          data: 'data:image/gif;base64,'
+          + buf.toString('base64')
+        }
+      })
+    }
   })
 })
 
-function applyCyclePalette(clusterer, image, palette) {
+function applyCyclePalette(clusterers, image, palette) {
   var cycles = Math.max(image.frames.length, palette.length / 4);
   var cycled = palette;
   for (var i = 0; i < cycles; i++) {
+    // If there are fewer clusters than cycles (e.g. fewer
+    // frames than palette colors), match the clusterer up
+    // with each frame.
+    var clusterer = clusterers[i % clusterers.length];
+
+    // ensure we wrap around forever with the palette.
     var paletteStart = (i*4) % palette.length;
     cycled = palette.slice(paletteStart);
     cycled.push.apply(cycled, palette.slice(0, paletteStart));
     clusterer.applyPalette(cycled, clusterer.pixels);
+
+    // Grab or create the frame. This needs to copy the data.
     var frame = image.frames[i] || (image.frames[i] = {});
-    // This needs to copy the data.
     frame.data = new Buffer(clusterer.pixels);
     frame.delay = frame.delay || 100;
   }
