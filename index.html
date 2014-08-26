@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ncolorpalette-service</title>
+</head>
+<body>
+<form method="POST" action="/service">
+  <input type="file" capture="camera" accept="image/*">
+  <button type="submit">Process Image</button>
+</form>
+<script type="text/javascript">
+(function() {
+
+var submit = document.querySelector('button[type=submit]');
+var input = document.querySelector('input[type=file]');
+
+var lastURI = null;
+
+input.addEventListener('change', showAsImage, false);
+submit.addEventListener('click', send, false);
+
+function send(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      var img = document.createElement('img');
+      img.src = xhr.response.content.data;
+      document.body.appendChild(img);
+    } else {
+      alert(xhr.status + ' ' + xhr.response);
+    }
+  }
+  xhr.open('POST', window.location.pathname + '/service');
+  xhr.setRequestHeader('Content-Type', 'application/json')
+  xhr.responseType = 'json';
+
+  fileToURL(input.files[0], function(err, url) {
+    xhr.send(JSON.stringify({
+      content: {
+        data: url
+      },
+      meta: {}
+    }))
+  })
+}
+
+function fileToURL(file, cb) {
+  var fr = new FileReader();
+  fr.onloadend = function() {
+    cb(null, fr.result);
+  }
+  fr.readAsDataURL(file)
+}
+
+function showAsImage(e) {
+  var file = e.target.files[0];
+  if (!file || file.type.indexOf('image') === -1) {
+    alert('Only images are accepted.');
+    return;
+  }
+
+  fileToURL(file, function(err, url) {
+    var img = document.createElement('img');
+    document.body.appendChild(img);
+    img.src = url;
+  })
+}
+
+}())
+</script>
+</body>
+</html>

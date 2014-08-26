@@ -14,7 +14,7 @@ app.use(bodyParser.json({limit: '1mb'}))
 app.use(express.static(__dirname + '/public'))
 app.use(morgan('tiny'));
 
-app.get('/', function(req, res) {
+app.get(/^\/(?:gameboy|cycled-gameboy)$/, function(req, res) {
   res.sendFile(__dirname + '/index.html');
 })
 
