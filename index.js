@@ -23,81 +23,57 @@ app.post('/gameboy/service', function(req, res) {
   var buf = dataUriToBuffer(req.body.content.data);
   readimage(buf, function(err, image) {
     if (err) {
-      res.status(500).json(err);
-      return;
+      return finish(err);
     }
 
-    var solved = [];
-    var solvedCount = 0;
-    image.frames.forEach(function(frame, i) {
-      var c = new NCP(frame.data);
-      c.solve(function(){}, onSolve.bind(null, i))
-    })
-
-    function onSolve(frameIdx, clusterer) {
-      solved[frameIdx] = clusterer;
-      solvedCount += 1;
-      if (solvedCount !== image.frames.length) return;
-
+    solveImage(image, function(err, cs) {
       var palette = palettes.gameboy.pixels.slice(0);
       image.frames.forEach(function(frame, i) {
-        var clusterer = solved[i];
-        clusterer.applyPalette(palette, frame.data);
+        var c = cs[i];
+        c.applyPalette(palette, frame.data);
       })
       writegif(image, finish)
-    }
-
-    function finish(err, buf) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      res.json({
-        content: {
-          data: 'data:image/gif;base64,'
-          + buf.toString('base64')
-        }
-      })
-    }
+    })
   })
+
+  function finish(err, buf) {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    res.json({
+      content: {
+        data: 'data:image/gif;base64,'
+        + buf.toString('base64')
+      }
+    })
+  }
 })
 
 app.post('/cycled-gameboy/service', function(req, res) {
   var buf = dataUriToBuffer(req.body.content.data);
   readimage(buf, function(err, image) {
     if (err) {
-      res.status(500).json(err);
-      return;
+      return finish(err);
     }
 
-    var solved = [];
-    var solvedCount = 0;
-    image.frames.forEach(function(frame, i) {
-      var c = new NCP(frame.data);
-      c.solve(function(){}, onSolve.bind(null, i))
-    })
-
-    function onSolve(frameIdx, clusterer) {
-      solved[frameIdx] = clusterer;
-      solvedCount += 1;
-      if (solvedCount !== image.frames.length) return;
-
+    solveImage(image, function(err, cs) {
       var palette = palettes.gameboy.pixels.slice(0);
-      applyCyclePalette(solved, image, palette);
+      applyCyclePalette(cs, image, palette);
       writegif(image, finish)
-    }
-
-    function finish(err, buf) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      res.json({
-        content: {
-          data: 'data:image/gif;base64,'
-          + buf.toString('base64')
-        }
-      })
-    }
+    })
   })
+
+  function finish(err, buf) {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    res.json({
+      content: {
+        data: 'data:image/gif;base64,'
+        + buf.toString('base64')
+      }
+    })
+  }
 })
 
 function applyCyclePalette(clusterers, image, palette) {
@@ -121,6 +97,22 @@ function applyCyclePalette(clusterers, image, palette) {
     frame.delay = frame.delay || 100;
   }
   return image;
+}
+
+function solveImage(image, cb) {
+  var solved = [];
+  var solvedCount = 0;
+  image.frames.forEach(function(frame, i) {
+    var c = new NCP(frame.data);
+    c.solve(function(){}, onSolve.bind(null, i))
+  })
+
+  function onSolve(frameIdx, clusterer) {
+    solved[frameIdx] = clusterer;
+    solvedCount += 1;
+    if (solvedCount !== image.frames.length) return;
+    cb(null, solved);
+  }
 }
 
 if (!module.parent) {
