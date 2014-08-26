@@ -9,12 +9,13 @@ var kirby = 'data:image/png;base64,'
 test('png -> gif', function(t) {
 
   r(app)
-    .post('/service')
+    .post('/cycled-gameboy/service')
     .send({ content: { data: kirby } })
     .expect(200)
     .expect('Content-Type', /json/)
     .expect(/\{"data":"data:image\/gif/)
     .end(function(err, res) {
+      console.log(res.body.content.data);
       t.end(err);
     })
 

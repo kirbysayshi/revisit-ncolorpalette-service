@@ -1,10 +1,12 @@
 var express = require('express');
-var NCP = require('ncolorpalette-clusterer');
 var bodyParser = require('body-parser');
+var morgan  = require('morgan');
+
+var NCP = require('ncolorpalette-clusterer');
+var palettes = require('ncolorpalette-palettes');
 var dataUriToBuffer = require('data-uri-to-buffer')
 var readimage = require('readimage');
 var writegif = require('writegif');
-var morgan  = require('morgan');
 
 var app = express();
 
@@ -16,7 +18,11 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 })
 
-app.post('/service', function(req, res) {
+app.post('/gameboy/service', function(req, res) {
+  // same as below but doesn't cycle, always outputs gif
+})
+
+app.post('/cycled-gameboy/service', function(req, res) {
   var buf = dataUriToBuffer(req.body.content.data);
   readimage(buf, function(err, image) {
     if (err) {
@@ -24,25 +30,13 @@ app.post('/service', function(req, res) {
       return;
     }
 
-    var input = new Uint8ClampedArray(image.frames[0].data);
+    // TODO: instead compute Cluster for each frame...
+    var input = image.frames[0].data;
 
     var c = new NCP(input);
     c.solve(function(){}, function(count) {
 
-      var palette = [
-        0, 60, 16, 255,
-        6, 103, 49, 255,
-        123, 180, 0, 255,
-        138, 196, 0, 255
-      ]
-
-      for (var i = 0; i < 4; i++) {
-        c.applyPalette(palette, input);
-        var frame = image.frames[i] || (image.frames[i] = {});
-        frame.data = new Buffer(input);
-        frame.delay = 1000;
-        palette = cycle(palette, (i + 1) * 4);
-      }
+      applyCyclePalette(c, image, palettes.gameboy.pixels);
 
       writegif(image, function(err, output) {
         res.json({
@@ -56,14 +50,28 @@ app.post('/service', function(req, res) {
   })
 })
 
-function cycle(palette, startPixel) {
-  var next = palette.slice(startPixel);
-  next.push.apply(next, palette.slice(0, startPixel));
-  return next;
+function applyCyclePalette(clusterer, image, palette) {
+  var cycles = Math.max(image.frames.length, palette.length / 4);
+  var cycled = palette;
+  for (var i = 0; i < cycles; i++) {
+    var paletteStart = (i*4) % palette.length;
+    cycled = palette.slice(paletteStart);
+    cycled.push.apply(cycled, palette.slice(0, paletteStart));
+    clusterer.applyPalette(cycled, clusterer.pixels);
+    var frame = image.frames[i] || (image.frames[i] = {});
+    // This needs to copy the data.
+    frame.data = new Buffer(clusterer.pixels);
+    frame.delay = frame.delay || 100;
+  }
+  return image;
 }
 
 if (!module.parent) {
-  app.listen(8000);
+  var server = app.listen(8000);
+  process.on('SIGINT', function() {
+    server.close();
+    process.exit();
+  });
 }
 
 module.exports = app;
