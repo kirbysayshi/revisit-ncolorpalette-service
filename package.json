@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "node test.js",
-    "start": "node index.js"
+    "start": "forever start index.js",
+    "stop": "forever stop index.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
     "body-parser": "^1.6.5",
     "data-uri-to-buffer": "0.0.3",
     "express": "^4.8.5",
+    "forever": "^0.11.1",
     "morgan": "^1.2.3",
     "ncolorpalette-clusterer": "^2.0.1",
     "ncolorpalette-palettes": "^1.0.0",
