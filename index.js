@@ -116,9 +116,7 @@ function solveImage(image, cb) {
 }
 
 if (!module.parent) {
-  var port = process.env.NODE_ENV === 'production'
-    ? 80
-    : 8000;
+  var port = process.ENV.PORT || 8000;
   var msg = 'listening on port ' + port;
   var server = app.listen(port, console.log.bind(console, msg));
   process.on('SIGINT', function() {
