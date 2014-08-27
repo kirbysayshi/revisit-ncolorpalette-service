@@ -1,6 +1,6 @@
 {
   "name": "ncolorpalette-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "revisit.link service for ncolorpalette",
   "main": "index.js",
   "engines": {
