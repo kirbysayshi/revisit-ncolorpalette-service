@@ -24,40 +24,26 @@ app.get(/^\/(?:gameboy|cycled-gameboy)$/, function(req, res) {
 
 app.post('/gameboy/service', function(req, res) {
   // same as below but doesn't cycle, always outputs gif
-  console.log('dataUriToBuffer:before', process.memoryUsage())
   var buf = dataUriToBuffer(req.body.content.data);
-  console.log('dataUriToBuffer:after', process.memoryUsage())
-  console.log('readImage:before', process.memoryUsage())
   readimage(buf, function(err, image) {
-    console.log('readImage:enter', process.memoryUsage())
     if (err) {
       return finish(err);
     }
 
-    console.log('solveImage:before', process.memoryUsage())
     solveImage(image, function(err, cs) {
-      console.log('solveImage:cb', process.memoryUsage())
       var palette = palettes.gameboy.pixels.slice(0);
       image.frames.forEach(function(frame, i) {
         var c = cs[i];
-        console.log('applyPalette:before:' + i, process.memoryUsage())
         c.applyPalette(palette, frame.data);
-        console.log('applyPalette:after:' + i, process.memoryUsage())
       })
-      console.log('writegif:before', process.memoryUsage())
       writegif(image, finish)
-      console.log('writegif:after', process.memoryUsage())
     })
-    console.log('solveImage:after', process.memoryUsage())
   })
-  console.log('readImage:after', process.memoryUsage())
 
   function finish(err, buf) {
-    console.log('finish:enter', process.memoryUsage())
     if (err) {
       return res.status(500).json(err);
     }
-    console.log('res.json:before', process.memoryUsage())
     res.json({
       content: {
         data: 'data:image/gif;base64,'

@@ -30,8 +30,7 @@
     "ncolorpalette-clusterer": "^2.0.1",
     "ncolorpalette-palettes": "^1.0.0",
     "readimage": "^1.0.0",
-    "gif-encoder": "git+https://github.com/kirbysayshi/gif-encoder.git",
-    "writegif": "git+https://github.com/kirbysayshi/writegif.git#ksh-dbglog"
+    "writegif": "^1.0.4"
   },
   "devDependencies": {
     "supertest": "^0.13.0",
