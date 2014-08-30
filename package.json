@@ -31,7 +31,7 @@
     "ncolorpalette-palettes": "^1.0.0",
     "readimage": "^1.0.0",
     "gif-encoder": "git+https://github.com/kirbysayshi/gif-encoder.git",
-    "writegif": "^1.0.4"
+    "writegif": "git+https://github.com/kirbysayshi/gif-encoder.git#ksh/dgblog"
   },
   "devDependencies": {
     "supertest": "^0.13.0",
