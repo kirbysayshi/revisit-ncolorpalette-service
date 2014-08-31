@@ -30,7 +30,7 @@
     "ncolorpalette-clusterer": "^2.0.1",
     "ncolorpalette-palettes": "^1.0.0",
     "readimage": "^1.1.0",
-    "writegif": "^1.0.4"
+    "writegif": "^1.1.0"
   },
   "devDependencies": {
     "supertest": "^0.13.0",
