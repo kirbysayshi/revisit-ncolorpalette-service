@@ -29,7 +29,7 @@
     "morgan": "^1.2.3",
     "ncolorpalette-clusterer": "^2.0.1",
     "ncolorpalette-palettes": "^1.0.0",
-    "readimage": "^1.1.0",
+    "readimage": "git+https://github.com/kirbysayshi/readimage.git#ksh/channel-fix",
     "writegif": "^1.1.0"
   },
   "devDependencies": {
