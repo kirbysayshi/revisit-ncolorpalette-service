@@ -32,6 +32,7 @@ function send(e) {
       document.body.appendChild(img);
     } else {
       alert(xhr.status + ' ' + xhr.response);
+      console.log(xhr.status, xhr.response);
     }
   }
   xhr.open('POST', window.location.pathname + '/service');
