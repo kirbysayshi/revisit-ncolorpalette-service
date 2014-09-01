@@ -45,6 +45,7 @@ app.post('/gameboy/service', function(req, res) {
       return res.status(500).json(err);
     }
     res.json({
+      meta: req.body.meta,
       content: {
         data: 'data:image/gif;base64,'
         + buf.toString('base64')
@@ -72,6 +73,7 @@ app.post('/cycled-gameboy/service', function(req, res) {
       return res.status(500).json(err);
     }
     res.json({
+      meta: req.body.meta,
       content: {
         data: 'data:image/gif;base64,'
         + buf.toString('base64')
