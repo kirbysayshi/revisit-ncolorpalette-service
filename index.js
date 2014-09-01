@@ -10,7 +10,7 @@ var writegif = require('writegif');
 
 var app = express();
 
-app.use(bodyParser.json({limit: '1mb'}))
+app.use(bodyParser.json({limit: '2mb'}))
 app.use(express.static(__dirname + '/public'))
 app.use(morgan('tiny'));
 
